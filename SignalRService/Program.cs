@@ -1,17 +1,23 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using SignalRService.Extensions;
 using SignalRService.Hubs;
 using SignalRService.Middleware;
-using System.Reflection;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
 // Add services to the container.
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddElasticsearchServices(builder.Configuration);
+
+// Conditionally add Elasticsearch only if configuration exists
+try
+{
+    builder.Services.AddElasticsearchServices(builder.Configuration);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Elasticsearch services not initialized: {ex.Message}");
+    // Continue without Elasticsearch if it's not critical
+}
 
 // Logging with Serilog
 Log.Logger = new LoggerConfiguration()
@@ -19,43 +25,62 @@ Log.Logger = new LoggerConfiguration()
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
+// CORS configuration - add more specific origins if needed in production
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyHeader()
+        policy.WithOrigins("http://localhost:3001") // Add your client origins here
+              .AllowAnyHeader()
               .AllowAnyMethod()
-              .SetIsOriginAllowed(_ => true)
-              .AllowCredentials();
+              .AllowCredentials()
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
+              .WithExposedHeaders("Content-Disposition");
     });
 });
 
 builder.Host.UseSerilog();
 
+// Register SignalR with specific settings for better reliability
+builder.Services.AddSignalR(options => {
+    options.EnableDetailedErrors = true;
+    options.MaximumReceiveMessageSize = 102400; // 100 KB
+});
+
 var app = builder.Build();
+
+// Important: Use CORS before other middleware
 app.UseCors("AllowAll");
 
 // Pipeline
 app.UseStaticFiles();
+app.UseRouting(); // Add explicit routing
 
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "KUVE SignalR Service v1");
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "KUVE SignalR Service v1");
+    });
+}
 
-app.UseHttpsRedirection();
+// Optional: Consider conditionally enabling HTTPS redirection
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseMiddleware<ApiKeyMiddleware>();
 app.UseMiddleware<IPWhitelistMiddleware>();
 
+// UseEndpoints with explicit routing
 app.MapControllers();
 app.MapHealthChecks("/health");
 
 // Map SignalR Hubs
-app.MapHub<ChatHub>("/hubs/chat").RequireCors("AllowAll"); ;
+app.MapHub<ChatHub>("/hubs/chat").RequireCors("AllowAll");
 
 app.Run();

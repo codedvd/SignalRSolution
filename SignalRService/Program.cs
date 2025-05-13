@@ -30,12 +30,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:3001") // Add your client origins here
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
-              .SetIsOriginAllowedToAllowWildcardSubdomains()
-              .WithExposedHeaders("Content-Disposition");
+              .AllowAnyMethod();
     });
 });
 
@@ -49,12 +46,11 @@ builder.Services.AddSignalR(options => {
 
 var app = builder.Build();
 
-// Important: Use CORS before other middleware
-app.UseCors("AllowAll");
-
 // Pipeline
 app.UseStaticFiles();
 app.UseRouting(); // Add explicit routing
+
+app.UseCors("AllowAll");
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

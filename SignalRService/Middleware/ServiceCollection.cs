@@ -42,17 +42,17 @@ namespace SignalRService.Middleware
             services.AddSingleton<MongoDbContext>();
 
             // CORS
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll", policy =>
-                {
-                    policy.AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .SetIsOriginAllowed(_ => true) // allows any origin
-                          .AllowCredentials()
-                          .WithExposedHeaders("Content-Disposition");
-                });
-            });
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy("AllowAll", policy =>
+            //    {
+            //        policy.AllowAnyHeader()
+            //              .AllowAnyMethod()
+            //              .SetIsOriginAllowed(_ => true) // allows any origin
+            //              .AllowCredentials()
+            //              .WithExposedHeaders("Content-Disposition");
+            //    });
+            //});
 
             //services.AddSignalR(options =>
             //{

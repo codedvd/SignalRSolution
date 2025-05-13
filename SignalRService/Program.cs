@@ -19,6 +19,17 @@ Log.Logger = new LoggerConfiguration()
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .SetIsOriginAllowed(_ => true)
+              .AllowCredentials();
+    });
+});
+
 builder.Host.UseSerilog();
 
 var app = builder.Build();
@@ -26,7 +37,6 @@ app.UseCors("AllowAll");
 
 // Pipeline
 app.UseStaticFiles();
-
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

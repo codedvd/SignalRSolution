@@ -12,6 +12,16 @@ namespace SignalRService.Hubs
         private readonly ILogger<ChatHub> _logger = logger;
         private readonly int _messageHistoryLimit = configuration.GetValue<int>("ChatSettings:MessageHistoryLimit", 100);
 
+        public override async Task OnConnectedAsync()
+        {
+            var response = await _elasticClient.SearchAsync<ChatRoom>(s => s
+               .Index("chat_rooms")
+               .Size(1000) // or however many rooms you expect
+               .Query(q => q.MatchAll())
+            );
+            await Clients.Caller.SendAsync("AvailableRooms", response.Documents.Select(r => r.RoomName).ToList(), "You're welcome to Kuve");
+        }
+
         /// <summary>
         /// Sends a message to all users in the same chat room as the sender and stores it in Elasticsearch.
         /// </summary>

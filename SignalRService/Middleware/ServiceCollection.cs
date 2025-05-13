@@ -48,7 +48,7 @@ namespace SignalRService.Middleware
                 {
                     policy.AllowAnyHeader()
                           .AllowAnyMethod()
-                          .SetIsOriginAllowed(_ => true)
+                          .SetIsOriginAllowed(_ => true) // allows any origin
                           .AllowCredentials()
                           .WithExposedHeaders("Content-Disposition");
                 });

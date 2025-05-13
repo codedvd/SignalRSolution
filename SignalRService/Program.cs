@@ -22,10 +22,10 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 var app = builder.Build();
+app.UseCors("AllowAll");
 
 // Pipeline
 app.UseStaticFiles();
-app.UseCors("AllowAll");
 
 
 app.UseSwagger();
@@ -46,6 +46,6 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 // Map SignalR Hubs
-app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<ChatHub>("/hubs/chat").RequireCors("AllowAll"); ;
 
 app.Run();

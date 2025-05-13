@@ -15,7 +15,7 @@
                 return;
             }
             var appSettings = context.RequestServices.GetRequiredService<IConfiguration>();
-            var apiKey = appSettings[APIKEY];
+            var apiKey = appSettings[APIKEY]!;
             if (!apiKey.Equals(extractedApiKey))
             {
                 context.Response.StatusCode = 401;

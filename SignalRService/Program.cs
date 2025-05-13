@@ -67,8 +67,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<ApiKeyMiddleware>();
-app.UseMiddleware<IPWhitelistMiddleware>();
+//app.UseMiddleware<ApiKeyMiddleware>();
+//app.UseMiddleware<IPWhitelistMiddleware>();
 
 // UseEndpoints with explicit routing
 app.MapControllers();

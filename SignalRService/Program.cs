@@ -56,14 +56,11 @@ app.UseCors("AllowAll");
 app.UseStaticFiles();
 app.UseRouting(); // Add explicit routing
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "KUVE SignalR Service v1");
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "KUVE SignalR Service v1");
+});
 
 // Optional: Consider conditionally enabling HTTPS redirection
 if (!app.Environment.IsDevelopment())
